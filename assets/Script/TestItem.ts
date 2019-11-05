@@ -1,12 +1,13 @@
-import CustomScrollViewItem from "./Library/CustomScrollViewItem";
+import CustomScrollViewItem from "./0-Library/CustomScrollViewItem";
 import TestScrollViewManager from "./TestScrollViewManager";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class TestItem extends CustomScrollViewItem {
-
-    public get id(): string { return this.index.toFixed(); }
+    public get id(): string {
+        return this.index.toFixed();
+    }
 
     @property(cc.Label)
     label: cc.Label = null;
@@ -34,6 +35,6 @@ export default class TestItem extends CustomScrollViewItem {
     public updateColor(): void {
         const isSelected: boolean = this.manager.isSelectedItem(this);
         this.button.target.color = isSelected ? cc.Color.RED : cc.Color.WHITE;
-        cc.log(`index: ${this.index}, ${isSelected}, ${this.button.normalColor}`)
+        cc.log(`index: ${this.index}, ${isSelected}, ${this.button.normalColor}`);
     }
 }

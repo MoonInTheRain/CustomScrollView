@@ -1,13 +1,10 @@
-import CustomScrollViewManager from "./Library/CustomScrollViewManager";
+import CustomScrollViewManager from "./0-Library/CustomScrollViewManager";
 import TestItem from "./TestItem";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class TestScrollViewManager extends CustomScrollViewManager {
-
-
-
     private clickedItemList: string[] = [];
 
     public onClickItem(item: TestItem) {
