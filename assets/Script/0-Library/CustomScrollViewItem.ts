@@ -1,34 +1,38 @@
 import CustomScrollViewManager from "./CustomScrollViewManager";
 
-const {ccclass, property} = cc._decorator;
+// tslint:disable-next-line: no-unused-declaration typedef
+const { ccclass, property } = cc._decorator;
 
+/**
+ * CustomScrollViewManagerのアイテム
+ * 継承して使用することを想定。
+ */
 @ccclass
 export default class CustomScrollViewItem extends cc.Component {
-
     /** インデックス */
-    public index:number = -1;
+    public index: number = -1;
 
     /** マネージャー */
     protected manager: CustomScrollViewManager;
 
-    public onDestroy() {
+    public onDestroy(): void {
         this.manager = null;
     }
 
     /**
      * 初期化
-     * @param manager 
+     * @param manager
      */
-    public init(manager: CustomScrollViewManager) {
+    public init(manager: CustomScrollViewManager): void {
         this.manager = manager;
-    } 
+    }
 
     /**
-     * アイテムの表示を更新する
-     * indexに負の値を入れると表示を消す。
-     * @param index 
+     * アイテムのindexを更新する
+     * 継承先ではこの関数をoverrideして表示を制御するのがよいと思われる。
+     * @param index
      */
-    updateItem (index: number) {
+    public updateItem(index: number): void {
         this.index = index;
     }
 }

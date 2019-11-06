@@ -1,13 +1,21 @@
 import CustomScrollViewItem from "./CustomScrollViewItem";
 
+// tslint:disable-next-line: typedef
 const { ccclass, property } = cc._decorator;
 
+/**
+ * ScrollViewにオブジェクトプールを持たせるようにするカスタマイズを行ったもの。
+ * CustomScrollViewItemと合わせて使用する。
+ * 継承して使用することを想定。
+ */
 @ccclass
 export default class CustomScrollViewManager extends cc.ScrollView {
     @property(cc.Node)
+    /** 自動生成する場合のアイテム。Prefabにするべき？ */
     public baseItem: cc.Node = null;
 
     @property
+    /** アイテムを自動生成するかどうか */
     public autoGenerate: boolean = false;
 
     @property(cc.Vec2)
@@ -30,9 +38,9 @@ export default class CustomScrollViewManager extends cc.ScrollView {
     public entityItemCount: cc.Vec2 = new cc.Vec2(3, 4);
 
     /** アイテムの実態のリスト */
-    public eneityItemList: CustomScrollViewItem[] = [];
+    public entityItemList: CustomScrollViewItem[] = [];
 
-    /** 現在のIndex */
+    /** 現在の左上にあるアイテムのIndex */
     private currentIndex: number = -1;
 
     /**
@@ -46,9 +54,13 @@ export default class CustomScrollViewManager extends cc.ScrollView {
     protected start(): void {
         super.start();
         this.init();
-        this.updateAll();
+        this.setContentSize();
     }
 
+    /**
+     * 初期化。
+     * スタート時に実行され、その後実行されることはない想定。
+     */
     protected init(): void {
         if ((this.horizontal && this.vertical) || (!this.horizontal && !this.vertical)) {
             cc.error("CustomScrollViewManager: 並びは縦か横、一方だけを選択する必要があります。縦方向として扱います");
@@ -63,32 +75,29 @@ export default class CustomScrollViewManager extends cc.ScrollView {
             this.content.anchorY = 0.5;
         }
 
-        this.eneityItemList = this.content.getComponentsInChildren(CustomScrollViewItem);
+        this.entityItemList = this.content.getComponentsInChildren(CustomScrollViewItem);
 
         if (this.autoGenerate) {
             if (this.baseItem == null) {
                 cc.error("CustomScrollViewManager: AutoGenerateを有効にする場合、BaseItemを設定してください");
             } else {
                 const entityItemCount = this.entityItemCount.x * this.entityItemCount.y;
-                for (let index = this.eneityItemList.length; index < entityItemCount; index++) {
+                for (let index = this.entityItemList.length; index < entityItemCount; index++) {
                     const newItem = cc.instantiate(this.baseItem);
-                    this.eneityItemList.push(newItem.getComponent(CustomScrollViewItem));
+                    this.entityItemList.push(newItem.getComponent(CustomScrollViewItem));
                     this.content.addChild(newItem);
                 }
             }
-        } else if (this.eneityItemList.length !== this.entityItemCount.x * this.entityItemCount.y) {
+        } else if (this.entityItemList.length !== this.entityItemCount.x * this.entityItemCount.y) {
             cc.error(
                 `CustomScrollViewManager: content下のItemの数(${
-                    this.eneityItemList.length
+                    this.entityItemList.length
                 })がentityItemCount(${this.entityItemCount.dot()})とあっていません。`
             );
         }
 
-        this.eneityItemList.forEach(item => item.init(this));
-    }
-
-    protected updateAll(): void {
-        this.setContentSize();
+        // tslint:disable-next-line: typedef
+        this.entityItemList.forEach(item => item.init(this));
     }
 
     /**
@@ -108,9 +117,26 @@ export default class CustomScrollViewManager extends cc.ScrollView {
         }
     }
 
-    protected update(dt): void {
+    protected update(dt: number): void {
         super.update(dt);
+        this.updateAllItem();
+    }
 
+    /**
+     * Contentのサイス、アイテムの表示をリセットする。
+     */
+    public resetAll(): void {
+        this.currentIndex = -1;
+        this.setContentSize();
+        this.updateAllItem();
+    }
+
+    /**
+     * アイテムのインデックスを更新する。
+     * @param force
+     */
+    public updateAllItem(force: boolean = false): void {
+        /** 左上のアイテムのIndex */
         let currentIndex = 0;
         if (this.vertical) {
             const y = this.content.y - this.content.parent.height / 2;
@@ -127,30 +153,40 @@ export default class CustomScrollViewManager extends cc.ScrollView {
         }
     }
 
+    /**
+     * 左上のインデックスからアイテム全体を更新する。
+     * @param newCurrentIndex
+     */
     protected updateIndex(newCurrentIndex: number): void {
         if (newCurrentIndex > this.currentIndex) {
-            for (let index = 0; index < this.eneityItemList.length; index++) {
-                const entityItem = this.eneityItemList[index];
+            for (let index = 0; index < this.entityItemList.length; index++) {
+                const entityItem = this.entityItemList[index];
                 if (entityItem.index < newCurrentIndex) {
-                    const newIndex = newCurrentIndex + this.eneityItemList.length - 1 - index;
+                    const newIndex = newCurrentIndex + this.entityItemList.length - 1 - index;
                     entityItem.updateItem(newIndex);
                     this.setItemPosition(newIndex, entityItem);
                 }
             }
         } else {
-            for (let index = 0; index < this.eneityItemList.length; index++) {
-                const entityItem = this.eneityItemList[this.eneityItemList.length - index - 1];
-                if (entityItem.index >= newCurrentIndex + this.eneityItemList.length) {
+            for (let index = 0; index < this.entityItemList.length; index++) {
+                const entityItem = this.entityItemList[this.entityItemList.length - index - 1];
+                if (entityItem.index >= newCurrentIndex + this.entityItemList.length) {
                     const newIndex = newCurrentIndex + index;
                     entityItem.updateItem(newIndex);
                     this.setItemPosition(newIndex, entityItem);
                 }
             }
         }
-        this.eneityItemList = this.eneityItemList.sort((a, b) => a.index - b.index);
+        // tslint:disable-next-line: typedef
+        this.entityItemList = this.entityItemList.sort((a, b) => a.index - b.index);
         this.currentIndex = newCurrentIndex;
     }
 
+    /**
+     * オブジェクトをインデックスに応じた場所に移動させる。
+     * @param index インデックス
+     * @param item オブジェクト
+     */
     private setItemPosition(index: number, item: CustomScrollViewItem): void {
         if (index >= this.itemCount) {
             item.node.active = false;
