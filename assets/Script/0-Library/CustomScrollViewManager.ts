@@ -122,7 +122,7 @@ export default class CustomScrollViewManager extends cc.ScrollView {
             currentIndex *= this.entityItemCount.y;
         }
         if (currentIndex >= 0 && currentIndex !== this.currentIndex) {
-            cc.log(`new Index: ${currentIndex}`);
+            // cc.log(`new Index: ${currentIndex}`);
             this.updateIndex(currentIndex);
         }
     }
@@ -138,7 +138,6 @@ export default class CustomScrollViewManager extends cc.ScrollView {
                 }
             }
         } else {
-            //for (let index = this.eneityItemList.length - 1; index >= 0; index--) {
             for (let index = 0; index < this.eneityItemList.length; index++) {
                 const entityItem = this.eneityItemList[this.eneityItemList.length - index - 1];
                 if (entityItem.index >= newCurrentIndex + this.eneityItemList.length) {
